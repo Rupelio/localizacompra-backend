@@ -1,0 +1,37 @@
+# Binários compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Diretório de dependências (caso use Go Modules)
+vendor/
+
+# Arquivos de build temporários
+*.log
+*.tmp
+
+# Diretório de cache do Go
+/go.sum
+/go.mod
+
+# Diretório de cache do Go (geral)
+GOPATH/
+go-build/
+*.swp
+
+# Configurações do editor/IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Docker artefatos temporários
+*.pid
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
