@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -55,4 +56,18 @@ func (r *pgxRepository) GetAll(ctx context.Context) ([]Store, error) {
 	}
 
 	return stores, nil
+}
+
+func (r *pgxRepository) CreateWithTx(ctx context.Context, tx pgx.Tx, store Store) (Store, error) {
+	query := `
+		INSERT INTO stores (name, address, cnpj)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at`
+
+	err := tx.QueryRow(ctx, query, store.Name, store.Address, store.CNPJ).Scan(&store.ID, &store.CreatedAt)
+	if err != nil {
+		return Store{}, err
+	}
+
+	return store, nil
 }

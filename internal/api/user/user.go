@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var ErrUserNotFound = errors.New("usuario não encontrado")
@@ -16,6 +18,7 @@ type User struct {
 	Phone        string    `json:"phone,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	Role         string    `json:"-"`
+	StoreID      *int64    `json:"store_id"`
 }
 
 type CreateUserRequest struct {
@@ -23,7 +26,6 @@ type CreateUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
-	Role     string `json:"role"`
 }
 
 type LoginUserRequest struct {
@@ -40,6 +42,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id int64) (User, error)
 	GetByEmail(ctx context.Context, email string) (User, error)
 	Create(ctx context.Context, user User) (User, error)
+	CreateWithTx(ctx context.Context, tx pgx.Tx, user User) (User, error)
 	// Update(ctx context.Context, user User) (User, error)
 	// Delete(ctx context.Context, id int64) error
 	UpdateRole(ctx context.Context, email string, role string) error

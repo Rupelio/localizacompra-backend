@@ -34,7 +34,7 @@ func (r *pgxRepository) Create(ctx context.Context, user User) (User, error) {
 }
 
 func (r *pgxRepository) GetByEmail(ctx context.Context, email string) (User, error) {
-	query := `SELECT id, name, email, password_hash, phone, created_at, role FROM users WHERE email = $1`
+	query := `SELECT id, name, email, password_hash, phone, created_at, role, store_id FROM users WHERE email = $1`
 
 	var user User
 
@@ -46,6 +46,7 @@ func (r *pgxRepository) GetByEmail(ctx context.Context, email string) (User, err
 		&user.Phone,
 		&user.CreatedAt,
 		&user.Role,
+		&user.StoreID,
 	)
 
 	if err != nil {
@@ -59,7 +60,7 @@ func (r *pgxRepository) GetByEmail(ctx context.Context, email string) (User, err
 }
 
 func (r *pgxRepository) GetByID(ctx context.Context, id int64) (User, error) {
-	query := `SELECT id, name, email, password_hash, phone, created_at, role FROM users WHERE id = $1`
+	query := `SELECT id, name, email, password_hash, phone, created_at, role, store_id FROM users WHERE id = $1`
 
 	var user User
 
@@ -71,6 +72,7 @@ func (r *pgxRepository) GetByID(ctx context.Context, id int64) (User, error) {
 		&user.Phone,
 		&user.CreatedAt,
 		&user.Role,
+		&user.StoreID,
 	)
 
 	if err != nil {
@@ -96,4 +98,26 @@ func (r *pgxRepository) UpdateRole(ctx context.Context, email string, role strin
 	}
 
 	return nil
+}
+
+func (r *pgxRepository) CreateWithTx(ctx context.Context, tx pgx.Tx, user User) (User, error) {
+	query := `
+		INSERT INTO users (name, email, password_hash, phone, role, store_id)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, created_at`
+
+	err := tx.QueryRow(ctx, query,
+		user.Name,
+		user.Email,
+		user.PasswordHash,
+		user.Phone,
+		user.Role,
+		user.StoreID,
+	).Scan(&user.ID, &user.CreatedAt)
+
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
 }

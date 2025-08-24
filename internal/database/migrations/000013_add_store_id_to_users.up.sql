@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN store_id BIGINT NULL REFERENCES stores(id);

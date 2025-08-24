@@ -29,7 +29,7 @@ func main() {
 	userHandler := user.NewHandler(userService)
 
 	storeRepo := store.NewRepository(db)
-	storeService := store.NewService(storeRepo)
+	storeService := store.NewService(db, storeRepo, userRepo)
 	storeHandler := store.NewHandler(storeService)
 
 	stockItemRepo := stock.NewRepository(db)
@@ -73,6 +73,7 @@ func main() {
 				r.Get("/search", productHandler.SearchByName)
 			})
 			r.Get("/categories", categoryHandler.GetAll)
+			r.Post("/stores", storeHandler.CreateStoreWithAdmin)
 		})
 
 		// --- Sub-grupo de Rotas Protegidas ---
@@ -101,7 +102,6 @@ func main() {
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.AdminOnly) // Segurança extra
 
-				r.Post("/stores", storeHandler.Create)
 				r.Get("/stores/{storeID}/products", stockItemHandler.GetAllByStoreId)
 				r.Post("/stores/{storeID}/products/{productID}", stockItemHandler.Create)
 			})

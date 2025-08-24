@@ -16,8 +16,8 @@ func NewHandler(s Service) *storeHandler {
 	}
 }
 
-func (h *storeHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req CreateStoreRequest
+func (h *storeHandler) CreateStoreWithAdmin(w http.ResponseWriter, r *http.Request) {
+	var req StoreWithAdminRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -25,13 +25,7 @@ func (h *storeHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	storeToCreate := Store{
-		Name:    req.Name,
-		Address: req.Address,
-		CNPJ:    req.CNPJ,
-	}
-
-	createdStore, err := h.service.Create(r.Context(), storeToCreate)
+	createdStore, err := h.service.CreateStoreWithAdmin(r.Context(), req)
 	if err != nil {
 		log.Printf("Erro ao criar loja: %v", err)
 		http.Error(w, "Erro interno do servidor", http.StatusInternalServerError)
