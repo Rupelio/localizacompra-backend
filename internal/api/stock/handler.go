@@ -46,6 +46,7 @@ func (h *stockItemHandler) Create(w http.ResponseWriter, r *http.Request) {
 		ProductID: productID,
 		Price:     req.Price,
 		Quantity:  req.Quantity,
+		Sector:    req.Sector,
 	}
 
 	createdStockItem, err := h.service.Create(r.Context(), stockItemToCreate)

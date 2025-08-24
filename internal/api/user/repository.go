@@ -82,3 +82,18 @@ func (r *pgxRepository) GetByID(ctx context.Context, id int64) (User, error) {
 
 	return user, nil
 }
+
+func (r *pgxRepository) UpdateRole(ctx context.Context, email string, role string) error {
+	query := `UPDATE users SET role = $1 WHERE email = $2`
+
+	tag, err := r.db.Exec(ctx, query, role, email)
+	if err != nil {
+		return err
+	}
+
+	if tag.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}

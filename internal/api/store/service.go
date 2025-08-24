@@ -22,6 +22,12 @@ func (s *storeService) Create(ctx context.Context, store Store) (Store, error) {
 	if store.Address == "" {
 		return Store{}, errors.New("o endereço da loja não pode ser vazio")
 	}
+	if store.CNPJ == "" {
+		return Store{}, errors.New("o CNPJ da loja não pode ser vazio")
+	}
+	if len(store.CNPJ) != 14 {
+		return Store{}, errors.New("o CNPJ da loja precisa ter 14 caracteres")
+	}
 	return s.repo.Create(ctx, store)
 }
 

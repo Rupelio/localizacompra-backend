@@ -13,11 +13,13 @@ type StockItem struct {
 	StoreID   int64   `json:"id_store"`
 	Price     float64 `json:"price"`
 	Quantity  int     `json:"quantity"`
+	Sector    string  `json:"sector"`
 }
 
 type CreateStockItemRequest struct {
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
+	Sector   string  `json:"sector"`
 }
 
 type ProductStockDetail struct {
@@ -26,6 +28,7 @@ type ProductStockDetail struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Quantity    int     `json:"quantity"`
+	Sector      string  `json:"sector"`
 }
 
 type Repository interface {

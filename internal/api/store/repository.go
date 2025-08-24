@@ -17,9 +17,9 @@ func NewRepository(dbpool *pgxpool.Pool) Repository {
 }
 
 func (r *pgxRepository) Create(ctx context.Context, store Store) (Store, error) {
-	query := `INSERT INTO stores (name, address) VALUES ($1, $2) RETURNING id, created_at`
+	query := `INSERT INTO stores (name, address, cnpj) VALUES ($1, $2, $3) RETURNING id, created_at`
 
-	err := r.db.QueryRow(ctx, query, store.Name, store.Address).Scan(&store.ID, &store.CreatedAt)
+	err := r.db.QueryRow(ctx, query, store.Name, store.Address, store.CNPJ).Scan(&store.ID, &store.CreatedAt)
 	if err != nil {
 		return Store{}, err
 	}
@@ -28,7 +28,7 @@ func (r *pgxRepository) Create(ctx context.Context, store Store) (Store, error) 
 }
 
 func (r *pgxRepository) GetAll(ctx context.Context) ([]Store, error) {
-	query := `SELECT id, name, address, created_at FROM stores`
+	query := `SELECT id, name, address, created_at, cnpj FROM stores`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
@@ -41,7 +41,7 @@ func (r *pgxRepository) GetAll(ctx context.Context) ([]Store, error) {
 
 	for rows.Next() {
 		var s Store
-		err := rows.Scan(&s.ID, &s.Name, &s.Address, &s.CreatedAt)
+		err := rows.Scan(&s.ID, &s.Name, &s.Address, &s.CreatedAt, &s.CNPJ)
 
 		if err != nil {
 			return nil, err

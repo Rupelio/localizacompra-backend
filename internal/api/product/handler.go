@@ -122,3 +122,29 @@ func (h *productHandler) SearchByName(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(products)
 }
+
+func (h *productHandler) PartialUpdate(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "ID do produto inválido", http.StatusBadRequest)
+		return
+	}
+
+	var req UpdateProductRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Corpo da requisição inválido", http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.PartialUpdate(r.Context(), id, req)
+	if err != nil {
+		if errors.Is(err, ErrProductNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Erro interno do servidor", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

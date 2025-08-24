@@ -60,7 +60,20 @@ func AdminOnly(next http.Handler) http.Handler {
 		role, ok := r.Context().Value(UserRoleKey).(string)
 
 		if !ok || (role != "admin" && role != "store_admin") {
-			http.Error(w, "Acesso negado: rota apenas para administradores", http.StatusUnauthorized)
+			http.Error(w, "Acesso negado: rota apenas para administradores", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func SuperAdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		role, ok := r.Context().Value(UserRoleKey).(string)
+
+		if !ok || (role != "super_admin") {
+			http.Error(w, "Acesso negado: rota apenas para super administradores", http.StatusForbidden)
 			return
 		}
 

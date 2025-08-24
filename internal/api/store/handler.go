@@ -28,6 +28,7 @@ func (h *storeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	storeToCreate := Store{
 		Name:    req.Name,
 		Address: req.Address,
+		CNPJ:    req.CNPJ,
 	}
 
 	createdStore, err := h.service.Create(r.Context(), storeToCreate)

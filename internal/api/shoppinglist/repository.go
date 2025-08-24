@@ -82,7 +82,7 @@ func (r *pgxRepository) GetAllByUserID(ctx context.Context, userID int64) ([]Sho
 
 	defer rows.Close()
 
-	var lists []ShoppingList
+	lists := make([]ShoppingList, 0)
 	for rows.Next() {
 		var l ShoppingList
 
@@ -155,4 +155,49 @@ func (r *pgxRepository) UpdateItemStatus(ctx context.Context, itemID int64, isCh
 	}
 
 	return nil
+}
+
+func (r *pgxRepository) GetOptimizedList(ctx context.Context, listID, storeID int64) ([]OptimizedListItem, error) {
+	query := `SELECT
+			p.name,
+			p.description,
+			sli.quantity,
+			sli.is_checked,
+			si.price,
+			si.sector
+		FROM
+			shopping_list_items sli
+		JOIN
+			products p ON sli.product_id = p.id
+		JOIN
+			stock_items si ON sli.product_id = si.product_id
+		WHERE
+			sli.shopping_list_id = $1 AND si.store_id = $2
+		ORDER BY
+			si.sector`
+	rows, err := r.db.Query(ctx, query, listID, storeID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	items := make([]OptimizedListItem, 0)
+
+	for rows.Next() {
+		var i OptimizedListItem
+
+		err := rows.Scan(&i.ProductName, &i.Description, &i.Quantity, &i.IsChecked, &i.Price, &i.Sector)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, i)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

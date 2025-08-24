@@ -42,3 +42,7 @@ func (s *productService) Delete(ctx context.Context, id int64) error {
 func (s *productService) SearchByName(ctx context.Context, name string) ([]Product, error) {
 	return s.repo.SearchByName(ctx, name)
 }
+
+func (s *productService) PartialUpdate(ctx context.Context, id int64, req UpdateProductRequest) error {
+	return s.repo.PartialUpdate(ctx, id, req)
+}

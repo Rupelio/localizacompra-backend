@@ -46,6 +46,15 @@ type UpdateItemRequest struct {
 	IsChecked bool `json:"is_checked"`
 }
 
+type OptimizedListItem struct {
+	ProductName string  `json:"product_name"`
+	Description string  `json:"description"`
+	Quantity    int     `json:"quantity"`
+	IsChecked   bool    `json:"is_checked"`
+	Price       float64 `json:"price"`
+	Sector      string  `json:"sector"`
+}
+
 type Repository interface {
 	CreateList(ctx context.Context, list ShoppingList) (ShoppingList, error)
 	CreateItem(ctx context.Context, item ShoppingListItem) (ShoppingListItem, error)
@@ -53,6 +62,7 @@ type Repository interface {
 	GetAllByUserID(ctx context.Context, userID int64) ([]ShoppingList, error)
 	GetAllItemsByListID(ctx context.Context, listID int64) ([]ListItemDetail, error)
 	UpdateItemStatus(ctx context.Context, itemID int64, isChecked bool) error
+	GetOptimizedList(ctx context.Context, listID int64, storeID int64) ([]OptimizedListItem, error)
 }
 
 type Service interface {
@@ -61,4 +71,5 @@ type Service interface {
 	GetAllByUserID(ctx context.Context, userID int64) ([]ShoppingList, error)
 	GetAllItemsByListID(ctx context.Context, userID, listID int64) ([]ListItemDetail, error)
 	UpdateItemStatus(ctx context.Context, userID, listID, itemID int64, isChecked bool) error
+	GetOptimizedList(ctx context.Context, userID, listID, storeID int64) ([]OptimizedListItem, error)
 }

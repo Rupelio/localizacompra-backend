@@ -65,3 +65,17 @@ func (s *shoppingService) UpdateItemStatus(ctx context.Context, userID, listID, 
 	// Note que o repositório só precisa do itemID e do isChecked.
 	return s.repo.UpdateItemStatus(ctx, itemID, isChecked)
 }
+
+func (s *shoppingService) GetOptimizedList(ctx context.Context, userID, listID, storeID int64) ([]OptimizedListItem, error) {
+	// Verificação de segurança: o utilizador é o dono da lista?
+	list, err := s.repo.GetShoppingListByID(ctx, listID)
+	if err != nil {
+		return nil, err
+	}
+	if list.UserID != userID {
+		return nil, errors.New("não autorizado")
+	}
+
+	// Se for, busca a lista otimizada
+	return s.repo.GetOptimizedList(ctx, listID, storeID)
+}

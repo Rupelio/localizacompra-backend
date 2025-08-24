@@ -1,6 +1,7 @@
 package main
 
 import (
+	"localiza-compra/backend/internal/api/category"
 	"localiza-compra/backend/internal/api/middleware"
 	"localiza-compra/backend/internal/api/product"
 	"localiza-compra/backend/internal/api/shoppinglist"
@@ -39,6 +40,10 @@ func main() {
 	shoppinglistService := shoppinglist.NewService(shoppinglistRepo)
 	shoppinglistHandler := shoppinglist.NewHandler(shoppinglistService)
 
+	categoryRepo := category.NewRepository(db)
+	categoryService := category.NewService(categoryRepo)
+	categoryHandler := category.NewHandler(categoryService)
+
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
@@ -60,12 +65,14 @@ func main() {
 		// --- Sub-grupo de Rotas Públicas ---
 		r.Group(func(r chi.Router) {
 			r.Post("/login", userHandler.Login)
+			r.Get("/logout", userHandler.Logout)
 			r.Post("/users", userHandler.Create)
 			r.Route("/products", func(r chi.Router) {
 				r.Get("/", productHandler.GetAll)
 				// Nossa nova rota de busca!
 				r.Get("/search", productHandler.SearchByName)
 			})
+			r.Get("/categories", categoryHandler.GetAll)
 		})
 
 		// --- Sub-grupo de Rotas Protegidas ---
@@ -79,9 +86,15 @@ func main() {
 			r.Route("/shopping-lists", func(r chi.Router) {
 				r.Post("/", shoppinglistHandler.CreateList)
 				r.Get("/", shoppinglistHandler.GetAllByUserID)
-				r.Post("/{listID}/items", shoppinglistHandler.CreateItem)
-				r.Get("/{listID}/items", shoppinglistHandler.GetAllItemsByListID)
-				r.Patch("/{listID}/items/{itemID}", shoppinglistHandler.UpdateItemStatus)
+				r.Route("/{listID}", func(r chi.Router) {
+					r.Get("/optimize", shoppinglistHandler.GetOptimizedList)
+
+					r.Route("/items", func(r chi.Router) {
+						r.Post("/", shoppinglistHandler.CreateItem)
+						r.Get("/", shoppinglistHandler.GetAllItemsByListID)
+						r.Patch("/{itemID}", shoppinglistHandler.UpdateItemStatus)
+					})
+				})
 			})
 
 			// --- Sub-grupo de Rotas SÓ PARA ADMINS ---
@@ -91,11 +104,20 @@ func main() {
 				r.Post("/stores", storeHandler.Create)
 				r.Get("/stores/{storeID}/products", stockItemHandler.GetAllByStoreId)
 				r.Post("/stores/{storeID}/products/{productID}", stockItemHandler.Create)
+			})
 
-				// Rotas de gestão de produtos para admins
+			// --- Sub-grupo de Rotas SÓ PARA SUPER ADMINS ---
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SuperAdminOnly)
+
 				r.Post("/products", productHandler.Create)
-				r.Put("/products/{id}", productHandler.Update)
+				r.Patch("/products/{id}", productHandler.PartialUpdate)
 				r.Delete("/products/{id}", productHandler.Delete)
+				r.Post("/categories", categoryHandler.Create)
+
+				r.Get("/categories/{id}", categoryHandler.GetByID)
+				r.Patch("/categories/{id}", categoryHandler.PartialUpdate) // Assumindo que criaremos este handler
+				r.Delete("/categories/{id}", categoryHandler.Delete)
 			})
 		})
 	})

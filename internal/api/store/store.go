@@ -10,11 +10,13 @@ type Store struct {
 	Name      string    `json:"name"`
 	Address   string    `json:"address"`
 	CreatedAt time.Time `json:"created_at"`
+	CNPJ      string    `json:"cnpj"`
 }
 
 type CreateStoreRequest struct {
 	Name    string `json:"name"`
 	Address string `json:"address"`
+	CNPJ    string `json:"cnpj"`
 }
 
 type Repository interface {

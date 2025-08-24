@@ -185,3 +185,33 @@ func (h *shoppingHandler) UpdateItemStatus(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *shoppingHandler) GetOptimizedList(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
+	if !ok {
+		http.Error(w, "ID do utilizador não encontrado", http.StatusInternalServerError)
+		return
+	}
+	listID, err := strconv.ParseInt(chi.URLParam(r, "listID"), 10, 64)
+	if err != nil {
+		http.Error(w, "ID da lista inválido", http.StatusBadRequest)
+		return
+	}
+
+	storeID, err := strconv.ParseInt(r.URL.Query().Get("storeID"), 10, 64)
+	if err != nil {
+		http.Error(w, "ID da loja inválido ou em falta no query parameter", http.StatusBadRequest)
+		return
+	}
+
+	optimizedList, err := h.service.GetOptimizedList(r.Context(), userID, listID, storeID)
+	if err != nil {
+		log.Printf("Erro ao buscar produtos: %v", err)
+		http.Error(w, "Erro interno do servidor", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(optimizedList)
+}

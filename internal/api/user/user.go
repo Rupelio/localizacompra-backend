@@ -31,12 +31,18 @@ type LoginUserRequest struct {
 	Password string `json:"password"`
 }
 
+type UpdateUserRole struct {
+	Email *string `json:"email"`
+	Role  *string `json:"role"`
+}
+
 type Repository interface {
 	GetByID(ctx context.Context, id int64) (User, error)
 	GetByEmail(ctx context.Context, email string) (User, error)
 	Create(ctx context.Context, user User) (User, error)
 	// Update(ctx context.Context, user User) (User, error)
 	// Delete(ctx context.Context, id int64) error
+	UpdateRole(ctx context.Context, email string, role string) error
 }
 
 type Service interface {

@@ -17,13 +17,14 @@ func NewRepository(dbpool *pgxpool.Pool) Repository {
 }
 
 func (r *pgxRepository) Create(ctx context.Context, item StockItem) (StockItem, error) {
-	query := `INSERT INTO stock_items (store_id, product_id, price, quantity) VALUES ($1, $2, $3, $4) RETURNING id`
+	query := `INSERT INTO stock_items (store_id, product_id, price, quantity, sector) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 
 	err := r.db.QueryRow(ctx, query,
 		item.StoreID,
 		item.ProductID,
 		item.Price,
 		item.Quantity,
+		item.Sector,
 	).Scan(&item.ID)
 
 	if err != nil {
